@@ -22,6 +22,7 @@ tommivann = pygame.image.load('img/tommivann.jpg')
 thuvannst = pygame.image.load('img/thuvannst.jpg')
 spilaaftur = pygame.image.load('img/spilaaftur.png')
 playagain = gameDisplay.blit(spilaaftur, (135, 210))
+playagainrect = pygame.draw.rect(gameDisplay, (0, 0, 255,), (330, 430, 150, 90), 0)
 gameDisplay.blit(background, (0, 0))
 
 hola = pygame.image.load('img/musahola.png')
@@ -48,6 +49,7 @@ gameDisplay.blit(Scoreboard, (0, 0))
 gameDisplay.blit(cheesescore, (750,555))
 gameDisplay.blit(Scoreboard3, (668, 555))
 
+
 field = []
 rects = []
 holur = []
@@ -67,7 +69,7 @@ class Musaleikur: #Bý tíl músaleik klasa til að auðvelda meðhöndlun
             holumaker = gameDisplay.blit(hola, (X, Y)) #býr til holur
             holur.append(holumaker)
             location.append((X, Y))
-            rect = pygame.draw.rect(gameDisplay, (0, 0, 0,), (J, K, 35, 36), 0) #býr til rects
+            rect = pygame.draw.rect(gameDisplay, (0, 0, 0,), (J, K, 36, 36), 0) #býr til rects
             rects.append(rect)
 
 
@@ -82,13 +84,13 @@ class Musaleikur: #Bý tíl músaleik klasa til að auðvelda meðhöndlun
                 K = 550 #
 
     def playerStig(self): #þegar kallað er í þetta uppfærir það töfluna með playernum og bætir við hann stigi
-        global NotandiScore
+        global NotandiScore,pressed
         NotandiScore += 1
         Scoreboard = myfont.render("Stig: " + str(NotandiScore), 1, (0, 0, 0))
         gameDisplay.blit(cheesescore, (52, 5))
         gameDisplay.blit(Scoreboard, (0, 0))
     def jennistig(self): #sama og playerstig nema bara með jenna
-        global jennipoints
+        global jennipoints,pressed
         jennipoints += 1
         Scoreboard2 = myfont.render("Jenni Stig: " + str(jennipoints), 1, (0, 0, 0))
         gameDisplay.blit(cheesescore, (752, 5))
@@ -132,13 +134,12 @@ class Musaleikur: #Bý tíl músaleik klasa til að auðvelda meðhöndlun
         tommiscore = 0
         totalpoints = 0 #í vinnslu, á að leyfa manni að spila aftur án þess að þurfa endurræsa leikinn
 
-
 timelast = pygame.time.get_ticks() #Meðhöndlar hvíldartímann
 m = Musaleikur()
 m.geraholur()
 click = 0
 relax = 2000 #relax minnkar eftir því sem leikurinn er spilaður meira, hægt er að hækka þessa tölu til að gera hann auðveldari í lengri tíma eða lækka til að gera han erfiðari
-endgame = 70 #Leikurinn ákvarðar sigurvegara eftir að spilað hefur verið fyrir 70 stig
+endgame = 50 #Leikurinn ákvarðar sigurvegara eftir að spilað hefur verið fyrir 70 stig
 pressed = 0
 def play():
     global field,timelast,click,relax
@@ -146,7 +147,37 @@ def play():
     if timenow - timelast >= relax:
         timelast = timenow
         m.geraholur()
-        field = m.musedakottur() #meöhöndlar spilun #meöhöndlar spilun
+        field = m.musedakottur()  # meöhöndlar spilun #meöhöndlar spilun
+
+def replay():
+    global timelast,click,relax,pressed,playagain,endgame
+    timelast = pygame.time.get_ticks()  # Meðhöndlar hvíldartímann
+    m = Musaleikur()
+    m.geraholur()
+    click = 0
+    relax = 2000  # relax minnkar eftir því sem leikurinn er spilaður meira, hægt er að hækka þessa tölu til að gera hann auðveldari í lengri tíma eða lækka til að gera han erfiðari
+    endgame = 0  # Leikurinn ákvarðar sigurvegara eftir að spilað hefur verið fyrir 70 stig
+    pressed = 0
+    while not crashed:
+        totalpoints = NotandiScore + tommiscore + jennipoints
+        if totalpoints < endgame:  # svolengi sem að engameinu er ekki náð heldur þetta áfram
+            pressed = 0
+            play()
+            if field.__len__() != 0:
+                if  event.button != 1:
+                    m.jennistig()
+        else:
+            points = [NotandiScore, tommiscore, jennipoints]  # hver vann
+            if max(points) == NotandiScore:
+                gameDisplay.blit(thuvannst, (0, 0))
+                playagain = gameDisplay.blit(spilaaftur, (135, 210))
+            elif max(points) == tommiscore:
+                gameDisplay.blit(tommivann, (0, 0))
+                playagain = gameDisplay.blit(spilaaftur, (135, 210))
+            elif max(points) == jennipoints:
+                gameDisplay.blit(jenniwin, (0, 0))
+                playagain = gameDisplay.blit(spilaaftur, (135, 210))
+            pygame.display.flip()
 
 while not crashed:
     totalpoints = NotandiScore + tommiscore + jennipoints
@@ -154,51 +185,55 @@ while not crashed:
         pressed = 0
         play()
     else:
-        points = [NotandiScore,tommiscore,jennipoints] #hver vann
+        points = [NotandiScore,tommiscore,jennipoints]  # hver vann
         if max(points) == NotandiScore:
             gameDisplay.blit(thuvannst, (0, 0))
+            playagainrect = pygame.draw.rect(gameDisplay, (0, 0, 255,), (330, 430, 150, 90), 0)
             playagain = gameDisplay.blit(spilaaftur, (135, 210))
         elif max(points) == tommiscore:
             gameDisplay.blit(tommivann, (0, 0))
             playagain = gameDisplay.blit(spilaaftur, (135, 210))
+            playagainrect = pygame.draw.rect(gameDisplay, (0, 0, 255,), (330, 430, 150, 90), 0)
         elif max(points) == jennipoints:
             gameDisplay.blit(jenniwin, (0, 0))
             playagain = gameDisplay.blit(spilaaftur, (135, 210))
-        pygame.display.update()
-
-    if not pygame.mouse.get_pressed() and field[0] == True:
-        m.jennistig()
+            playagainrect = pygame.draw.rect(gameDisplay, (0, 0, 255,), (330, 430, 150, 90), 0)
+        pygame.display.flip()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
         print(event)
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT_BUTTON:
-            if field.__len__() != 0: #kemur í veg fyrir error er ýtt er á reit áður en að mynd er birtuð
+            if field.__len__() != 0: # kemur í veg fyrir error er ýtt er á reit áður en að mynd er birtuð
                 click += 1
                 if click == 10:
                     if relax > 500:
                         relax -= 200
                         click = 0
-                if field[1].collidepoint(event.pos) and field[0] == True:
+                if field[1].collidepoint(event.pos) and field[0] == True and pressed == 0: # gefur þér stig ef þú hittir á Jenna
                     if totalpoints < endgame:
                         if pressed == 0:
                             m.playerStig()
+                            timelast = pygame.time.get_ticks()
+                            field[0] = "inactive"
+                            m.geraholur()
+                            play()
                             pressed = 1
-                elif field[1].collidepoint(event.pos) == False and field[0] == True:
+
+                elif field[1].collidepoint(event.pos) != pygame.mouse.get_cursor() and field[0] == True:  # gefur jenna stig ef þú klikkar og hittir ekki á jenna meðan jenni er þarna
                     if totalpoints < endgame:
                         if pressed == 0:
                             m.jennistig()
                             pressed = 1
-                elif field[1].collidepoint(event.pos) and field[0] == False:
+                elif field[1].collidepoint(event.pos) and field[0] == False:  # Tommi stelur stigunum þínum ef þú klikkar á hann
                     if totalpoints < endgame:
                         if pressed == 0:
                             m.tommibad()
                             pressed = 1
-
-
-
+                elif totalpoints > endgame and playagainrect.collidepoint(event.pos):
+                    replay()
+                    pygame.display.flip()
     pygame.display.flip()
-
 pygame.quit()
 
 quit()
