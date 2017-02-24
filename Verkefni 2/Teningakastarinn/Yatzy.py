@@ -64,6 +64,7 @@ t4 = rects[3]
 t5 = rects[4]
 
 class Yatzy:
+    done = False
     location = [(310,240),(390,240),(430,320),(350,320),(270,320)]  #heldur um location á teningunum
     gameDisplay.blit(background, (0, 0))
     gameDisplay.blit(diceIMGY, (230, 160))
@@ -84,7 +85,7 @@ class Yatzy:
         gameDisplay.blit(diceIMG5, Yatzy.location[4])
 
     def throwDice(self):
-        global kast,kastaftur
+        global kast
         if kast == 0:
             background = pygame.image.load('img/yatzybord2.jpg')
             gameDisplay.blit(background, (0, 0))
@@ -95,7 +96,7 @@ class Yatzy:
                 ten = teningar[x]
                 tabordi.append(ten)
                 i += 1
-            kast += 1
+        kast += 1
 
 
     def kastaAftur(self):
@@ -103,13 +104,11 @@ class Yatzy:
         background = pygame.image.load('img/yatzybord2.jpg')
         gameDisplay.blit(background, (0, 0))
         i = 0
-
         gameDisplay.blit(tabordi[0],Yatzy.location[0])
         gameDisplay.blit(tabordi[1],Yatzy.location[1])
         gameDisplay.blit(tabordi[2],Yatzy.location[2])
         gameDisplay.blit(tabordi[3],Yatzy.location[3])
         gameDisplay.blit(tabordi[4],Yatzy.location[4])
-
         while i < kastaftur.__len__():
             x = random.randint(0, 5)
 
@@ -128,15 +127,14 @@ class Yatzy:
             if kastaftur[i] == Yatzy.location[4]:
                 gameDisplay.blit(teningar[x], Yatzy.location[4])
                 tabordi[4] = teningar[x]
-
             i += 1
-        kast += 1
+
         kastaftur = []
+        kast += 1
 
     def listener(self):
-        global aftur,pressaftur
+        global aftur,pressaftur,kast,tabordi
         if press.collidepoint(event.pos) and kast == 0:
-            event.pos = 0, 0
             y.throwDice()
             pressaftur = pygame.draw.rect(gameDisplay, (255, 255, 0), (295, 440, 200, 100))
             aftur = gameDisplay.blit(hendaaftur, (295, 440))
@@ -151,43 +149,46 @@ class Yatzy:
             kastaftur.append(y.location[3])
         if rects[4].collidepoint(event.pos):
             kastaftur.append(y.location[4])
-        elif pressaftur.collidepoint(event.pos) and kast == 1:
-            y.kastaAftur()
-            pressaftur = pygame.draw.rect(gameDisplay, (255, 255, 0), (295, 440, 200, 100))
-            aftur = gameDisplay.blit(hendaaftur, (295, 440))
-        elif pressaftur.collidepoint(event.pos) and kast == 2:
-            y.kastaAftur()
 
-y = Yatzy()
+        if pressaftur.collidepoint(event.pos) and kast == 1:
+            self.kastaAftur()
+
+        elif pressaftur.collidepoint(event.pos) and kast == 2:
+            self.kastaAftur()
+            Yatzy.done = True
+            if kast == 3 and Yatzy.done == True:
+                gameDisplay.blit(byrjanytt, (295, 440))
+
+        elif restart.collidepoint(event.pos) and Yatzy.done == True :
+            kast = 0
+            Yatzy.done = False
+            tabordi = []
+            background = pygame.image.load('img/yatzybord.jpg')
+            gameDisplay.blit(background, (0, 0))
+            gameDisplay.blit(diceIMGY, (230, 160))
+            gameDisplay.blit(diceIMGA, (290, 160))
+            gameDisplay.blit(diceIMGT, (350, 160))
+            gameDisplay.blit(diceIMGZ, (410, 160))
+            gameDisplay.blit(diceIMGY, (470, 160))
+            if kast == 0:
+                gameDisplay.blit(takki, (295, 440))
+
+
+
+
 
 while not crashed:
-    if kast == 3:
-        restart = pygame.draw.rect(gameDisplay, (255, 255, 0), (295, 440, 200, 100))
-        gameDisplay.blit(byrjanytt, (295, 440))
+    if kast >= 1 and kast < 3:
+        pressaftur = pygame.draw.rect(gameDisplay, (255, 255, 0), (295, 440, 200, 100))
+        aftur = gameDisplay.blit(hendaaftur, (295, 440))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
         print(event)
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT_BUTTON:
-            if restart.collidepoint(event.pos) and kast == 3:
-                kast = 0
-                event.pos = 0,0
-                tabordi = []
-                gameDisplay.blit(background, (0, 0))
-                gameDisplay.blit(diceIMGY, (230, 160))
-                gameDisplay.blit(diceIMGA, (290, 160))
-                gameDisplay.blit(diceIMGT, (350, 160))
-                gameDisplay.blit(diceIMGZ, (410, 160))
-                gameDisplay.blit(diceIMGY, (470, 160))
-                if kast == 0:
-                    gameDisplay.blit(takki, (295, 440))
-                y = Yatzy()
+        if event.type == pygame.MOUSEBUTTONUP and event.button == LEFT_BUTTON:
+            y = Yatzy()
             y.listener()
-            event.pos = 0,0
-
-
-
 
     pygame.display.update()
 pygame.quit()
