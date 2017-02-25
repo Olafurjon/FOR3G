@@ -36,6 +36,8 @@ diceIMG4 = pygame.image.load('img/teningar/t4.png')
 diceIMG5 = pygame.image.load('img/teningar/t5.png')
 diceIMG6 = pygame.image.load('img/teningar/t6.png')
 
+selected = pygame.image.load('img/selected.png')
+
 diceIMGY = pygame.image.load('img/teningar/tY.png')
 diceIMGA = pygame.image.load('img/teningar/tA.png')
 diceIMGT = pygame.image.load('img/teningar/tT.png')
@@ -96,11 +98,10 @@ class Yatzy:
                 ten = teningar[x]
                 tabordi.append(ten)
                 i += 1
-        kast += 1
 
 
     def kastaAftur(self):
-        global kast,kastaftur
+        global kast,kastaftur,restart
         background = pygame.image.load('img/yatzybord2.jpg')
         gameDisplay.blit(background, (0, 0))
         i = 0
@@ -130,36 +131,59 @@ class Yatzy:
             i += 1
 
         kastaftur = []
+        if kast >= 2:
+            Yatzy.done = True
+            restart = pygame.draw.rect(gameDisplay, (255, 255, 0), (295, 440, 200, 100))
+            gameDisplay.blit(byrjanytt, (295, 440))
         kast += 1
 
     def listener(self):
-        global aftur,pressaftur,kast,tabordi
+        global aftur,pressaftur,kast,tabordi,selected1
         if press.collidepoint(event.pos) and kast == 0:
             y.throwDice()
             pressaftur = pygame.draw.rect(gameDisplay, (255, 255, 0), (295, 440, 200, 100))
             aftur = gameDisplay.blit(hendaaftur, (295, 440))
         pygame.display.update()
-        if rects[0].collidepoint(event.pos):
-            kastaftur.append(y.location[0])
-        if rects[1].collidepoint(event.pos):
-            kastaftur.append(y.location[1])
-        if rects[2].collidepoint(event.pos):
-            kastaftur.append(y.location[2])
-        if rects[3].collidepoint(event.pos):
-            kastaftur.append(y.location[3])
-        if rects[4].collidepoint(event.pos):
-            kastaftur.append(y.location[4])
 
-        if pressaftur.collidepoint(event.pos) and kast == 1:
+        if Yatzy.location[0] in kastaftur and rects[0].collidepoint(event.pos):
+            kastaftur.remove(Yatzy.location[0])
+            gameDisplay.blit(tabordi[0], Yatzy.location[0])
+        elif rects[0].collidepoint(event.pos) and Yatzy.done != True and kast != 0 and Yatzy.location[0] not in kastaftur:
+            kastaftur.append(Yatzy.location[0])
+            gameDisplay.blit(selected, Yatzy.location[0])
+
+        if Yatzy.location[1] in kastaftur and rects[1].collidepoint(event.pos):
+            kastaftur.remove(Yatzy.location[1])
+            gameDisplay.blit(tabordi[1], Yatzy.location[1])
+        elif rects[1].collidepoint(event.pos) and Yatzy.done != True and kast != 0 and Yatzy.location[1] not in kastaftur:
+            kastaftur.append(Yatzy.location[1])
+            gameDisplay.blit(selected, Yatzy.location[1])
+
+        if Yatzy.location[2] in kastaftur and rects[2].collidepoint(event.pos):
+            kastaftur.remove(Yatzy.location[2])
+            gameDisplay.blit(tabordi[2], Yatzy.location[2])
+        elif rects[2].collidepoint(event.pos) and Yatzy.done != True and kast != 0 and Yatzy.location[2] not in kastaftur:
+            kastaftur.append(Yatzy.location[2])
+            gameDisplay.blit(selected, Yatzy.location[2])
+
+        if Yatzy.location[3] in kastaftur and rects[3].collidepoint(event.pos):
+            kastaftur.remove(Yatzy.location[3])
+            gameDisplay.blit(tabordi[3], Yatzy.location[3])
+        elif rects[3].collidepoint(event.pos) and Yatzy.done != True and kast != 0 and Yatzy.location[3] not in kastaftur:
+            kastaftur.append(Yatzy.location[3])
+            gameDisplay.blit(selected, Yatzy.location[3])
+
+        if Yatzy.location[4] in kastaftur and rects[4].collidepoint(event.pos):
+            kastaftur.remove(Yatzy.location[4])
+            gameDisplay.blit(tabordi[4], Yatzy.location[4])
+        elif rects[4].collidepoint(event.pos) and Yatzy.done != True and kast != 0 and Yatzy.location[4] not in kastaftur:
+            kastaftur.append(Yatzy.location[4])
+            gameDisplay.blit(selected, Yatzy.location[4])
+
+        if pressaftur.collidepoint(event.pos) and Yatzy.done != True:
             self.kastaAftur()
 
-        elif pressaftur.collidepoint(event.pos) and kast == 2:
-            self.kastaAftur()
-            Yatzy.done = True
-            if kast == 3 and Yatzy.done == True:
-                gameDisplay.blit(byrjanytt, (295, 440))
-
-        elif restart.collidepoint(event.pos) and Yatzy.done == True :
+        elif restart.collidepoint(event.pos) and Yatzy.done == True:
             kast = 0
             Yatzy.done = False
             tabordi = []
@@ -174,20 +198,17 @@ class Yatzy:
                 gameDisplay.blit(takki, (295, 440))
 
 
-
-
-
+y = Yatzy()
 while not crashed:
-    if kast >= 1 and kast < 3:
+    if kast >= 1 and kast < 3 and kast != 0:
         pressaftur = pygame.draw.rect(gameDisplay, (255, 255, 0), (295, 440, 200, 100))
         aftur = gameDisplay.blit(hendaaftur, (295, 440))
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
         print(event)
         if event.type == pygame.MOUSEBUTTONUP and event.button == LEFT_BUTTON:
-            y = Yatzy()
+
             y.listener()
 
     pygame.display.update()
