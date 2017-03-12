@@ -5,6 +5,7 @@
 import pygame
 import random
 import time
+import Leidfinnur
 from math import floor
 
 
@@ -33,10 +34,9 @@ skele2 = pygame.image.load('img/skellie2.png')
 skellies = [skele1,skele2]
 
 clock = pygame.time.Clock()
-clock.tick(10)
 
 # Holds the level layout in a list of strings.
-maze = [
+maze2 = [
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
     "W-------*-----------------------------CW",
     "W--------------LWWWW-WWWWWWWWWWWWWWWW--W",
@@ -68,46 +68,83 @@ maze = [
     "WC----C--------------LW-----M---WL----ME",
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 ]
+maze = [
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W----------------WWWWWWWWWWWWWWWWWWWW--W",
+    "W--------------------------------------W",
+    "W----------------WWWWWWWWWWWWWWWWWW----W",
+    "W---------------------------------W----W",
+    "WWWWWWWWWWWWWWWWWWWWWWW----W------W----W",
+    "W---------------------W--W--W-----W----W",
+    "W---------------------WWW----WWWWW-----W",
+    "W--------------------------------------E",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+]
+maze2 = [
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------W",
+    "W--------------------------------------E",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+]
 
-def pathfinding(themap, epos, playpos, width, height):
-    di = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-    vis = {}
-    fro = {}
-    q = []
-    q.append(epos)
-    vis[epos] = 1
-    fro[epos] = epos
-    while(len(q) != 0):
-        at = q[0]
-        q.pop(0)
-        for x in range(4):
-            ne = (at[0]+di[x][0], at[1]+di[x][1])
-            if 0 <= ne[0] and ne[0] < width and 0 <= ne[1] and ne[1] < height:
-                if ne not in vis:
-                    if themap[ne] == '-' or themap[ne] == '+' or themap[ne] == '*' or themap[ne] == 'C' or themap[ne] == 'M' or themap[ne] == 'L' and themap[ne] != "W":
-                        q.append(ne)
-                        vis[ne] = 1
-                        fro[ne] = at
-    print(len(vis))
-    if playpos in vis:
-        row = []
-        at = playpos
-        while True:
-            if at in fro:
-                if fro[at] != at:
-                    row.append(at)
-                    at = fro[at]
-                else:
-                    break
-        row.reverse()
-        return row
-    else:
-        return []
+buckets = list()
+bombs = list()
+bricks = list()
+skraut = list()
+skraut2 = list()
+gras = list()
 
+leidfinnur = Leidfinnur.Leidfinnur()
 
 class Player(object):
     def __init__(self):
-        self.rect = pygame.Rect(84, 32, 16, 16)
+        self.rect = pygame.Rect(84, 32, 14, 14)
 
     def move(self, dx, dy):
         # Move each axis separately. Note that this checks for collisions both times.
@@ -138,164 +175,100 @@ class Player(object):
 class Stalker(object):
     def __init__(self):
         self.rect = pygame.Rect(4*16, 28*16, 16, 16)
+        for brick in bricks:
+            if self.rect.colliderect(brick.rect):
+                if self.rect.x > 0:  # Moving right; Hit the left side of the wall
+                    self.rect.right = brick.rect.left
+                if self.rect.x < 0:  # Moving left; Hit the right side of the wall
+                    self.rect.left = brick.rect.right
+                if self.rect.y > 0:  # Moving down; Hit the top side of the wall
+                    self.rect.bottom = brick.rect.top
+                if self.rect.y < 0:  # Moving up; Hit the bottom side of the wall
+                    self.rect.top = brick.rect.bottom
+
 
     def Stalkeron(self,path):
         if len(path) != 0:
-            pos = findcord(self.rect.x,self.rect.y)
-            print pos
+            pos = leidfinnur.findcord(self.rect.x,self.rect.y)
+            #print pos
             while pos == path[0]:
                 path.pop(0)
-                pos = findcord(self.rect.x,self.rect.y)
+                pos = leidfinnur.findcord(self.rect.x,self.rect.y)
                 if len(path) == 0:
                     return
-            pos = findcord(self.rect.x, self.rect.y)
+            pos = leidfinnur.findcord(self.rect.x, self.rect.y)
 
-            th = GetDirections(pos,path[0])
-            self.rect.x += th[0] * 100/100
-            self.rect.y += th[1] * 100/100
+            th = leidfinnur.GetDirections(pos,path[0])
+            self.rect.x += th[0] * 2
+            self.rect.y += th[1] * 2
 
-def Rect(r1x, r1y, r1w, r1h, r2x, r2y, r2w, r2h):
-    if not (r2x > r1x + r1w or r2x + r2w < r1x or r2y > r1y + r1h or r2y +r2h < r1y):
-        return True
-
-def GetDirections(at, to):
-    if at[0] < to[0]:
-        return (1,0)
-    if at[0] > to[0]:
-        return (-1,0)
-    if at[1] < to[1]:
-        return (0,1)
-    if at[1] > to[1]:
-        return (0,-1)
-
-def findcord(posx,posy):
-    area = 0
-    best = (0,0)
-    for x in range(40):
-        for y in range(30):
-            cordx = x * 16
-            cordy = y * 16
-            if Rect(posx, posy, 1,1, cordx, cordy,16,16):
-                holdarea = calcarea(posx, posy, 1, 1, x, y, 16, 16)
-                if holdarea > area:
-                    best = (x,y)
-                    area = holdarea
-    return best
-
-def calcarea(A, B, C, D, E, F, G, H):
-    SA = abs((C-A)*(D-B))
-    SB = abs((G-E)*(H-F))
-    if E>=C or A>=G or B>=H or F>= D:
-        return SA+B
-    else:
-        x1 = min(G,C)
-        x2 = max(A,E)
-        y1 = min(D,H)
-        y2 = max(B,F)
-        return SA+SB-abs((x1-x2)*(y1-y2))
-
-
-class Brick(object):
+class Things(object):
     def __init__(self, pos):
         self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
 
 
-    # A class to hold the magic rectangle
-class MagicBox(object):
-    def __init__(self, pos):
-        self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
-
-
-class WaterBucket(object):
-    def __init__(self, pos):
-        self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
-
-class Ornament(object):
-    def __init__(self, pos):
-        self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
-
-class Ornament2(object):
-    def __init__(self, pos):
-        self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
-
-class Bush(object):
-    def __init__(self, pos):
-        self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
-
-
-buckets = list()
 clock = pygame.time.Clock()
-bombs = list()
-bricks = list()     # List to hold the walls
+
 player = Player()
 stalker = Stalker()
 hero = 1
 haswater = False
-skraut = list()
-skraut2 = list()
-gras = list()
+
 if haswater == True:
     bucket = "Yes"
 else:
     bucket = "No"
 
 
-# Parse the maze string above. W = wall, E = exit, M = magic box
 x = 0
 y = 0
 c = 0
 ma = {}
 
-mapmaze = {}
-
-for mapx in enumerate(maze):
-    for mapy in enumerate(mapx):
-        mapmaze[(mapy,mapx)] = mapy
-
-
 for rowx,row in enumerate(maze):
     for coly,col in enumerate(row):
         ma[(coly, rowx)] = col
         if col == "L":
-            water = WaterBucket((x, y))
+            water = Things((x, y))
             buckets.append(water)
         if col == "*":
-            Orn = Ornament((x, y))
+            Orn = Things((x, y))
             skraut.append(Orn)
         if col == "+":
-            Orn = Ornament2((x, y))
+            Orn = Things((x, y))
             skraut2.append(Orn)
         if col == "C":
-            grodur = Bush((x, y))
+            grodur = Things((x, y))
             gras.append(grodur)
         if col == "W":
-            bricks.append(Brick((x, y)))
+            bricks.append(Things((x, y)))
         if col == "E":
             end_rect = pygame.Rect(x, y, 16, 16)
-        if col == "M":
-            magic_rect = MagicBox((x, y))
-            bombs.append(magic_rect)
+        #if col == "M":
+           #magic_rect = Things((x, y))
+            #bombs.append(magic_rect)
 
         x += 16
 
     y += 16
     x = 0
+
+
 t0 = time.time()
-relax = 50000
+relax = 5000000
 timelast = pygame.time.get_ticks()
 crashed = False
 time_Start = False
-print sorted(ma)
-print mapmaze
 points = 3
+
 getpoints = myfont.render(str(points),1,(0,0,0))
 while not crashed:
     clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
-    #print "player pos:" + str(player.rect[0]) + " " + str(player.rect[1])
-    #print "Stalker pos:" + str(stalker.rect[0]) + " " + str(stalker.rect[1])
+    print "player pos:" + str(player.rect[0] / 16) + " " + str(player.rect[1]/16)
+    print "Stalker pos:" + str(stalker.rect[0] / 16) + " " + str(stalker.rect[1]/16)
         #print(event)
 
     if event.type == pygame.KEYDOWN or pygame.KEYUP:  # Move the player if an arrow key is pressed
@@ -308,7 +281,10 @@ while not crashed:
             player.move(0, -2)
         if key[pygame.K_DOWN]:
             player.move(0, 2)
-        if player.rect.colliderect(end_rect):
+
+        if points < 35 and player.rect.colliderect(end_rect):
+            player.rect.right = player.rect.left
+        if player.rect.colliderect(end_rect) and points >= 35:
             raise SystemExit, 'You win!'
         for b in bombs:
             if player.rect.colliderect(b.rect):
@@ -316,6 +292,7 @@ while not crashed:
                     bombs.remove(b.rect)
                     points += 5
                     haswater = False
+
                 else:
                     raise SystemExit, "You Lose"
 
@@ -359,13 +336,12 @@ while not crashed:
 
         gameDisplay.blit(hero0, player.rect)
         gameDisplay.blit(HAL, (stalker.rect.x, stalker.rect.y, stalker.rect.width, stalker.rect.height))
-        ok = findcord(stalker.rect.x,stalker.rect.y)
-        playerpos = findcord(player.rect.x, player.rect.y)
-        path = pathfinding(ma,ok,findcord(player.rect.x,player.rect.y),40,30)
-        print(path)
-        stalker.rect.y - 16
+        ok = leidfinnur.findcord(stalker.rect.x,stalker.rect.y)
+        path = leidfinnur.pathfinding(ma,ok,leidfinnur.findcord(player.rect.x,player.rect.y),40,30)
+        #print(path)
+
         stalker.Stalkeron(path)
-        print (stalker.rect.x / 16, stalker.rect.y / 16)
+        #print (stalker.rect.x / 16, stalker.rect.y / 16)
 
 
 
@@ -383,7 +359,7 @@ while not crashed:
         else:
             bucket = "No"
         pygame.draw.rect(gameDisplay, (255, 255, 255), (0, 0, 80, 64))
-        print (player.rect.x /16 , player.rect.y /16)
+        #print (player.rect.x /16 , player.rect.y /16)
         if player.rect != (84,32,16,16):
             t1 = time.time()
             time_Start = True
