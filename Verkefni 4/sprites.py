@@ -16,6 +16,16 @@ class Enemy(pygame.sprite.Sprite):
         if arg == "down":
             self.rect.y += 10
 
+class bullets(pygame.sprite.Sprite):
+    def __init__(self,width,height):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('img/serenitysmall.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = -100
+        self.rect.y = -100
+
+
+
 class Hero(pygame.sprite.Sprite):
 
     def __init__(self,width,height,resw,resh):
@@ -36,6 +46,12 @@ class Hero(pygame.sprite.Sprite):
         # Move the rectangle
         self.rect.x += dx
         self.rect.y += dy
+
+    def shoot(self,resH):
+        if pygame.event == pygame.KEYUP or pygame.KEYDOWN:
+            key = pygame.key.get_pressed()
+
+
 
 
 

@@ -19,6 +19,7 @@ pygame.display.set_caption("Verkefni 4")
 clock = pygame.time.Clock()
 
 fighters = pygame.sprite.Group()
+clip = list()
 all_sprites = pygame.sprite.Group()
 
 tiefighters = list()
@@ -70,7 +71,6 @@ while not crashed:
     gameDisplay.blit(space, (0, x - resH))
     if started:
         all_sprites.draw(gameDisplay)
-
         if tiefighters[9].rect.x >= resW-30:
             arg = "left"
             for tie in fighters:
@@ -79,8 +79,22 @@ while not crashed:
             arg = "right"
             for tie in fighters:
                 tie.move("down")
+
         for tie in fighters:
             tie.move(arg)
+            if pygame.sprite.spritecollideany(tie,clip) and clip.__len__() != 0:
+                fighters.remove(tie)
+                all_sprites.remove_internal(tie)
+                all_sprites.remove(bullet)
+
+
+        if clip.__len__() !=  0:
+            for bullet in clip:
+                bullet.rect.y -= 5
+                if bullet.rect.y <= 0 or bullet.rect.y >= 900:
+                    clip.remove(bullet)
+                    print "bullet dead"
+                    all_sprites.remove(bullet)
 
         pygame.display.update()
         pygame.display.flip()
@@ -92,6 +106,7 @@ while not crashed:
         if event.type == pygame.QUIT:
             crashed = True
 
+
     if event.type == pygame.KEYDOWN or pygame.KEYUP:  # Move the player if an arrow key is pressed
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
@@ -102,6 +117,13 @@ while not crashed:
             Hero.move(0, -2)
         if key[pygame.K_DOWN]:
             Hero.move(0, 2)
+        if key[pygame.K_SPACE]:
+            bullet = sprites.bullets(10, 10)
+            bullet.rect.y = Hero.rect.y - 10
+            bullet.rect.x = Hero.rect.x
+            all_sprites.add(bullet)
+            clip.append(bullet);
+
 
         if event.type == pygame.MOUSEBUTTONUP and event.button == LEFT_BUTTON:
             if playgameclick.collidepoint(event.pos):
