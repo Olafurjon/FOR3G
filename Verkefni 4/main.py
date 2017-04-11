@@ -6,7 +6,7 @@ import pygame
 import sprites
 import time
 import random
-from math import floor
+import math
 
 
 pygame.init()
@@ -26,6 +26,7 @@ clip = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 
 tiefighters = list()
+tiefighters2 = list()
 wave2 = pygame.sprite.Group()
 space = pygame.image.load('img/space1.jpg')
 def mainmenu(gameDisplay,resW):
@@ -36,7 +37,7 @@ def mainmenu(gameDisplay,resW):
 spawntime = 10
 def readyfighters():
     x = 50
-    y = -300
+    y = 0
     k = 0
     for i in range(r):
         tie = sprites.Enemy(20,15,resW,resH)
@@ -54,23 +55,23 @@ def readyfighters():
 
 def fighters2():
     x = 50
-    y = -350
+    y = 50
     k = 0
     for i in range(10):
-        newtie = sprites.Enemy(20,15,resW,resH)
-        tiefighters.append(newtie)
-        newtie.rect.x = x
-        newtie.rect.y = y
-        wave2.add(newtie)
-        all_sprites.add(newtie)
+        tie = sprites.Enemy2(20,15,resW,resH)
+        tiefighters.append(tie)
+        tie.rect.x = x
+        tie.rect.y = y
+        wave2.add(tie)
+        all_sprites.add(tie)
         x += 50
-        k += 2
+        k += 1
         if k == 10:
             y += 50
             x = 50
             k = 0
-
 readyfighters()
+fighters2()
 
 
 
@@ -99,77 +100,48 @@ while not crashed:
     t1 = time.time()
     time_Start = True
     ms = t1 - t0
-    sek = int(floor(ms))
-    print sek
-    if sek == spawntime:
-        readyfighters()
-        t0 = time.time()
-        t += 1
-        if t == 5:
-            if k != 2:
-                k += 1
-            if k > 2:
-                k == 2
-            if k == 2:
-                spawntime = 20
+    sek = int(math.floor(ms))
+    #print sek
 
-
-            t = 0
 
 
     if started:
 
         all_sprites.draw(gameDisplay)
-
         for tie in fighters:
-           if tie.rect.x >= (resW-30):
-               print "snúavið"
-               arg = "left"
-               for tie in fighters:
-                   tie.move("down",k)
+            tie.update1()
 
-           if tie.rect.x <= 0:
-               arg = "right"
-               print "snúavið"
-               for tie in fighters:
-                   tie.move("down",k)
+        for tie in wave2:
+            tie.update2()
 
-        for newtie in wave2:
-           if newtie.rect.x >= (resW-30):
-               arg = "leftska"
-
-
-           if newtie.rect.x <= 0:
-               arg = "skaright"
-
-
-        if clip.__len__() !=  0:
-           for bullet in clip:
-               bullet.rect.y -= 5
-               if bullet.rect.y <= 0 or bullet.rect.y >= 900:
-                   clip.remove(bullet)
-                   print "bullet dead"
-                   all_sprites.remove(bullet)
-
-        for tie in fighters:
-            tie.move(arg,k)
+        for tie in tiefighters:
             if pygame.sprite.spritecollideany(tie, clip):
                 for bullet in clip:
                     if bullet.rect.colliderect(tie):
                         all_sprites.remove(bullet)
                         clip.remove(bullet)
                 all_sprites.remove(tie)
-                fighters.remove(tie)
+                tiefighters.remove(tie)
 
-        for newtie in wave2:
-            newtie.move(arg,k)
-            if pygame.sprite.spritecollideany(newtie, clip):
-                for bullet in clip:
-                    if bullet.rect.colliderect(newtie):
-                        all_sprites.remove(bullet)
-                        clip.remove(bullet)
-                all_sprites.remove(newtie)
-                wave2.remove(newtie)
+
+
+        if clip.__len__() != 0:
+            for bullet in clip:
+                if bullet.type == "straight":
+                    bullet.rect.y -= 5
+                if bullet.type == "rightska":
+                    bullet.rect.y -= 5
+                    bullet.rect.x += 2
+                if bullet.type == "leftska":
+                    bullet.rect.y -= 5
+                    bullet.rect.x -= 2
+                if bullet.rect.y <= 0 or bullet.rect.y >= 900:
+                    clip.remove(bullet)
+                    print "bullet dead"
+                    all_sprites.remove(bullet)
+
+
+
 
 
 
@@ -186,25 +158,28 @@ while not crashed:
     missile += 1
     if event.type == pygame.KEYDOWN or pygame.KEYUP:  # Move the player if an arrow key is pressed
         key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT]:
-            Hero.move(-2, 0)
-        if key[pygame.K_RIGHT]:
-            Hero.move(2, 0)
-        if key[pygame.K_UP]:
-            Hero.move(0, -2)
-        if key[pygame.K_DOWN]:
-            Hero.move(0, 2)
+        Hero.keylistener()
         if missile >= 20:
             missile = 0
 
         if key[pygame.K_SPACE] and missile == 0 :
             print "shoot"
             bullet = sprites.bullets(10, 10,Hero)
+            if Hero.angle < 20 and Hero.angle > -20:
+                bullet.rect.y = Hero.rect.y - 27
+                bullet.rect.x = Hero.rect.x + 12
+                bullet.type = "straight"
+            if Hero.angle < -20 and Hero.angle > -70:
+                bullet.rect.y = Hero.rect.y - 27
+                bullet.rect.x = Hero.rect.x + 30
+                bullet.type = "rightska"
+            if Hero.angle < 70 and Hero.angle > 20:
+                bullet.rect.y = Hero.rect.y - 27
+                bullet.rect.x = Hero.rect.x - 5
+                bullet.type = "leftska"
+
             all_sprites.add(bullet)
             clip.add(bullet)
-
-
-
 
 
     if event.type == pygame.MOUSEBUTTONUP and event.button == LEFT_BUTTON:
