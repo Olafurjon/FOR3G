@@ -91,11 +91,11 @@ x= 0
 t = 0
 k = 1
 while not crashed:
-    if x == resH:
+    if x == resH*-1:
         x = 0
-    x+= 1
+    x-= 1
     gameDisplay.blit(space, (0, x))
-    gameDisplay.blit(space, (0, x - resH))
+    gameDisplay.blit(space, (0, x + resH))
     clock.tick(60)
     t1 = time.time()
     time_Start = True
@@ -127,21 +127,33 @@ while not crashed:
 
         if clip.__len__() != 0:
             for bullet in clip:
+                if bullet.counter >= 3:
+                    clip.remove(bullet)
+                    all_sprites.remove(bullet)
                 if bullet.type == "straight":
                     bullet.rect.y -= 5
+                if bullet.type == "down":
+                    bullet.rect.y += 5
                 if bullet.type == "rightska":
                     bullet.rect.y -= 5
+                    bullet.rect.x += 2
+                if bullet.type == "downright":
+                    bullet.rect.y += 10
                     bullet.rect.x += 2
                 if bullet.type == "leftska":
                     bullet.rect.y -= 5
                     bullet.rect.x -= 2
+                if bullet.type == "downleft":
+                    bullet.rect.y += 5
+                    bullet.rect.x -= 2
+                if bullet.type == "left":
+                    bullet.rect.x -= 5
+                if bullet.type == "right":
+                    bullet.rect.x += 5
                 if bullet.rect.y <= 0 or bullet.rect.y >= 900:
                     clip.remove(bullet)
                     print "bullet dead"
                     all_sprites.remove(bullet)
-
-
-
 
 
 
@@ -165,18 +177,48 @@ while not crashed:
         if key[pygame.K_SPACE] and missile == 0 :
             print "shoot"
             bullet = sprites.bullets(10, 10,Hero)
-            if Hero.angle < 20 and Hero.angle > -20:
+            if Hero.angle < 20 and Hero.angle >= -20 or Hero.angle < -340 or Hero.angle >= 330:
                 bullet.rect.y = Hero.rect.y - 27
                 bullet.rect.x = Hero.rect.x + 12
                 bullet.type = "straight"
-            if Hero.angle < -20 and Hero.angle > -70:
+            elif Hero.angle < -20 and Hero.angle >= -80 or Hero.angle < 330 and Hero.angle >= 290:
                 bullet.rect.y = Hero.rect.y - 27
                 bullet.rect.x = Hero.rect.x + 30
+                bullet.image = pygame.transform.rotate(bullet.image, -15)
                 bullet.type = "rightska"
-            if Hero.angle < 70 and Hero.angle > 20:
-                bullet.rect.y = Hero.rect.y - 27
-                bullet.rect.x = Hero.rect.x - 5
+            elif Hero.angle < 80 and Hero.angle >= 20 or Hero.angle < -290 and Hero.angle >= -340:
+                bullet.rect.y = Hero.rect.y - 30
+                bullet.rect.x = Hero.rect.x - 10
+                bullet.image = pygame.transform.rotate(bullet.image, 15)
                 bullet.type = "leftska"
+            elif Hero.angle < 120 and Hero.angle >= 80 or Hero.angle < -250 and Hero.angle >= -290:
+                bullet.rect.y = Hero.rect.y + 12
+                bullet.rect.x = Hero.rect.x - 30
+                bullet.image = pygame.transform.rotate(bullet.image,90)
+                bullet.type = "left"
+            elif Hero.angle < -80 and Hero.angle >= -120 or Hero.angle < 300 and Hero.angle >= 240:
+                bullet.rect.y = Hero.rect.y + 12
+                bullet.rect.x = Hero.rect.x + 30
+                bullet.image = pygame.transform.rotate(bullet.image,90)
+                bullet.type = "right"
+            elif Hero.angle < -120 and Hero.angle >= -150 or Hero.angle < 240 and Hero.angle >= 215:
+                bullet.rect.y = Hero.rect.y + 12
+                bullet.rect.x = Hero.rect.x + 8
+                bullet.image = pygame.transform.rotate(bullet.image,45)
+                bullet.type = "downright"
+                bullet.type = "right"
+            elif Hero.angle < 180 and Hero.angle >= 120 or Hero.angle < -220 and Hero.angle >= -250:
+                bullet.rect.y = Hero.rect.y + 12
+                bullet.rect.x = Hero.rect.x - 10
+                bullet.image = pygame.transform.rotate(bullet.image,-45)
+                bullet.type = "downleft"
+            elif Hero.angle < 215 and Hero.angle >= 180 or Hero.angle < -150 and Hero.angle >= -220:
+                bullet.rect.y = Hero.rect.y + 27
+                bullet.rect.x = Hero.rect.x + 12
+                bullet.type = "down"
+            else:
+                Hero.angle + 180
+
 
             all_sprites.add(bullet)
             clip.add(bullet)

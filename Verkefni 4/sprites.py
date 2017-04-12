@@ -152,7 +152,9 @@ class bullets(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('img/skot1.png')
         self.rect = self.image.get_rect()
+        self.counter = 0
         self.type = "straight"
+
 
 
 
@@ -249,7 +251,7 @@ class Hero(pygame.sprite.Sprite):
 
             print self.angle
 
-            #self.move(self.floating[0],self.floating[1])
+            self.move(self.floating[0],self.floating[1])
             if self.angle > 360:
                 self.angle = 0
             if self.angle < -360:
