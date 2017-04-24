@@ -11,47 +11,48 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self,width,height,resw,resh):
         super(Enemy,self).__init__()
         pygame.sprite.Sprite.__init__(self)
+        self.boomimage = pygame.image.load('img/Boom.png').convert_alpha()
         self.image = pygame.image.load('img/Tiefightersmall.png').convert_alpha()
         self.rect = self.image.get_rect()
-        self.speedx = 0.2
-        self.speedy = 0.1
+        self.speedx = 1
+        self.speedy = 9
         self.spacewidth = resw
         self.arg = "right"
         self.rect.x = 50
-        self.rect.x += 1
+        self.rect.x += self.speedx
         self.down = False
-
+        self.counter = 0
     def update1(self):
         self.move(self.arg,1)
         if self.rect.x >= (self.spacewidth - 30):
-                print "snúavið"
                 self.arg = "left"
-                self.move("down",9)
-                self.move(self.arg,1)
+                self.move("down",self.speedy)
+                self.counter += 1
+                self.move(self.arg,self.speedx)
 
         if self.rect.x <= 0:
             self.arg = "right"
-            print "snúavið"
-            self.move("down",9)
-            self.move(self.arg,1)
+            self.move("down",self.speedy)
+            self.counter += 1
+            self.move(self.arg,self.speedx)
 
-
+        if self.counter >= 5:
+            self.speedx += 1
+            self.speedy += 1
+            self.counter = 0
         if self.rect.y > 900:
             self.kill()
             print "tie die"
 
     def update2(self):
-        print self.down
         self.move(self.arg,2)
         if self.rect.x >= (self.spacewidth - 30):
-            print "snúavið"
             self.arg = "left"
             self.move("down",21)
             self.move(self.arg,2)
 
         if self.rect.x <= 0:
             self.arg = "right"
-            print "snúavið"
             self.move("down",21)
             self.move(self.arg,2)
 
@@ -81,14 +82,15 @@ class Enemy2(pygame.sprite.Sprite):
     def __init__(self,width,height,resw,resh):
         super(Enemy2,self).__init__()
         pygame.sprite.Sprite.__init__(self)
+        self.boomimage = pygame.image.load('img/Boom.png').convert_alpha()
         self.image = pygame.image.load('img/dtiefighter2.png').convert_alpha()
         self.rect = self.image.get_rect()
-        self.speedx = 0.2
-        self.speedy = 0.1
+        self.speedx = 1
+        self.speedy = 21
         self.spacewidth = resw
         self.arg = "right"
         self.rect.x = 50
-        self.rect.x += 1
+        self.rect.x += self.speedx
         self.down = False
 
 
@@ -99,12 +101,12 @@ class Enemy2(pygame.sprite.Sprite):
         self.move(self.arg,1)
         if self.rect.x >= (self.spacewidth - 30):
                 self.arg = "left"
-                self.move("down",9)
+                self.move("down",self.speedy)
                 self.move(self.arg,1)
 
         if self.rect.x <= 0:
             self.arg = "right"
-            self.move("down",9)
+            self.move("down",self.speedy)
             self.move(self.arg,1)
 
 
@@ -117,14 +119,14 @@ class Enemy2(pygame.sprite.Sprite):
         if self.rect.x >= (self.spacewidth - 30):
             print "snúavið"
             self.arg = "left"
-            self.move("down",21)
-            self.move(self.arg,2)
+            self.move("down",self.speedy)
+            self.move(self.arg,self.speedx+1)
 
         if self.rect.x <= 0:
             self.arg = "right"
             print "snúavið"
-            self.move("down",21)
-            self.move(self.arg,2)
+            self.move("down",self.speedy)
+            self.move(self.arg,self.speedx+1)
 
         if self.rect.y > 900:
             self.kill()
@@ -249,7 +251,7 @@ class Hero(pygame.sprite.Sprite):
                 self.move(0, self.movement / 100 )
                 self.floating = (0, 1)
 
-            print self.angle
+            #print self.angle
 
             self.move(self.floating[0],self.floating[1])
             if self.angle > 360:
